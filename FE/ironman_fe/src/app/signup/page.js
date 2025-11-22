@@ -21,6 +21,9 @@ export default function SignupPage() {
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [stress, setStress] = useState("");
+const [sleep, setSleep] = useState("");
+const [bp, setBp] = useState("");
 
   // NEW — Step 4 Confirmation
   const [confirmSubmit, setConfirmSubmit] = useState("");
@@ -46,10 +49,44 @@ export default function SignupPage() {
     router.push("/");
   };
 
-  const handleFinalSubmit = () => {
-    alert("Signup completed successfully!");
-    router.push("/");
+  const handleFinalSubmit = async () => {
+  if (!confirmSubmit) return;
+
+  const signupData = {
+    email,
+    username,
+    password,
+    role,
+    specialization,
+    experience,
+    height,
+    weight,
+    stress,
+    sleep,
+    bp
   };
+
+  try {
+    const res = await fetch("/api/auth/register", {
+      
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(signupData),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Signup completed successfully!");
+      router.push("/");
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    alert("Server error. Try again later.");
+  }
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -185,47 +222,78 @@ export default function SignupPage() {
 
         {/* STEP 3 — Person */}
         {step === 3 && role === "person" && (
-          <>
-            <h1 className="text-2xl font-bold text-center mb-6">Person Details</h1>
-            <form className="flex flex-col gap-4">
-              <input
-                type="number"
-                placeholder="Height (cm)"
-                className="border p-3 rounded-md"
-                value={height}
-                onChange={(e) => setHeight(e.target.value)}
-                required
-              />
+  <>
+    <h1 className="text-2xl font-bold text-center mb-6">Person Details</h1>
+    <form className="flex flex-col gap-4">
 
-              <input
-                type="number"
-                placeholder="Weight (kg)"
-                className="border p-3 rounded-md"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                required
-              />
+      <input
+        type="number"
+        placeholder="Height (cm)"
+        className="border p-3 rounded-md"
+        value={height}
+        onChange={(e) => setHeight(e.target.value)}
+        required
+      />
 
-              <button
-                type="button"
-                onClick={handleNextFinal}
-                className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
-              >
-                Next
-              </button>
+      <input
+        type="number"
+        placeholder="Weight (kg)"
+        className="border p-3 rounded-md"
+        value={weight}
+        onChange={(e) => setWeight(e.target.value)}
+        required
+      />
 
-              <button
-                type="button"
-                className="bg-gray-300 text-black py-2 rounded-md hover:bg-gray-400 mt-3"
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            </form>
-          </>
-        )}
+      {/* NEW — Stress */}
+      <input
+        type="text"
+        placeholder="Stress Level (Low / Medium / High)"
+        className="border p-3 rounded-md"
+        value={stress}
+        onChange={(e) => setStress(e.target.value)}
+        required
+      />
 
-        {/* STEP 4 — SUMMARY + CONFIRMATION */}
+      {/* NEW — Sleep */}
+      <input
+        type="number"
+        placeholder="Sleep Hours per Day"
+        className="border p-3 rounded-md"
+        value={sleep}
+        onChange={(e) => setSleep(e.target.value)}
+        required
+      />
+
+      {/* NEW — Blood Pressure */}
+      <input
+        type="text"
+        placeholder="Blood Pressure (Ex: 120/80)"
+        className="border p-3 rounded-md"
+        value={bp}
+        onChange={(e) => setBp(e.target.value)}
+        required
+      />
+
+      <button
+        type="button"
+        onClick={handleNextFinal}
+        className="bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+      >
+        Next
+      </button>
+
+      <button
+        type="button"
+        className="bg-gray-300 text-black py-2 rounded-md hover:bg-gray-400 mt-3"
+        onClick={handleCancel}
+      >
+        Cancel
+      </button>
+
+    </form>
+  </>
+)}
+
         {/* STEP 4 — SUMMARY + CONFIRMATION */}
 {step === 4 && (
   <>
@@ -247,6 +315,9 @@ export default function SignupPage() {
         <>
           <p><strong>Height:</strong> {height} cm</p>
           <p><strong>Weight:</strong> {weight} kg</p>
+          <p><strong>Stress Level:</strong> {stress}</p>
+    <p><strong>Sleep:</strong> {sleep} hours/day</p>
+    <p><strong>Blood Pressure:</strong> {bp}</p>
         </>
       )}
     </div>
