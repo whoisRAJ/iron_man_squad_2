@@ -10,19 +10,36 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    if (username === "admin" && password === "12345") {
+  setMessage("Checking...");
+  
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: username, password }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
       setMessage("Login Successful!");
 
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
     } else {
-      setMessage("Invalid Username or Password.");
+      setMessage(data.message);
     }
-  };
+  } catch (error) {
+    setMessage("Server error. Try again later.");
+  }
+};
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">

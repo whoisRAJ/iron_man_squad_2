@@ -1,15 +1,17 @@
+"use client"
 import Image from "next/image";
 import Link from "next/link";
 import CicularProgress from "../reusableComp/circularProgressBar";
 import CalendarComp from "../reusableComp/calendar";
 import ChartCompData from "../reusableComp/chart";
 import Tipsdata from "../reusableComp/tips";
+import React from "react";
 
-const cards = [
-  { title: "Steps", value: "1204", maxVal: "10000" },
-  { title: "Sleep", value: "7", maxVal: "9" },
-  { title: "BP", value: "110", maxVal: "150" },
-];
+// const cards = [
+//   { title: "Steps", value: "1204", maxVal: "10000" },
+//   { title: "Sleep", value: "7", maxVal: "9" },
+//   { title: "BP", value: "110", maxVal: "150" },
+// ];
 
 const chartData = {
   labels: ["Sunday", "Monday", "Tuesday", "Wednesday"],
@@ -25,6 +27,42 @@ const chartData = {
 };
 
 export default function Dashboard() {
+  // Example state hooks for fetched data, error, and loading
+  const [data, setData] = React.useState(null);
+  console.log('data"', data)
+  const [error, setError] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/users/wellness?email=testuser444@example.com');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const result = await response.json();
+        setData(result[0]);
+        setChart(result)
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+    // Dynamically create cards from data
+  const cards = data
+    ? [
+        { title: "Steps", value: data.steps, maxVal: 10000 },
+        { title: "Sleep Hours", value: data.sleepHours, maxVal: 9 },
+        { title: "Blood Pressure", value: data.BP, maxVal: 150 },
+        // { title: "Status", value: data.status, maxVal: 1 },
+        // { title: "Date", value: new Date(data.date).toLocaleDateString(), maxVal: 1 }
+      ]
+    : [];
+
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Sidebar */}
@@ -41,6 +79,9 @@ export default function Dashboard() {
           </Link>
           <Link href="/contact-doctor" className="hover:text-blue-600">
             Contact Doctor
+          </Link>
+          <Link href="/" className="hover:text-blue-600">
+            Logout
           </Link>
         </nav>
       </aside>

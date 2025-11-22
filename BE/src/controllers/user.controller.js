@@ -1,3 +1,37 @@
+import PatientWellness from "../models/patient_wellness.js";
+// Fetch patient wellness details for a user for a week or a specific date
+export const getPatientWellness = async (req, res) => {
+  try {
+    const { email } = req.query;
+    const { date, weekStart, weekEnd } = req.query;
+
+    if (!email) return res.status(400).json({ error: "Email is required" });
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    let query = { userId: user._id };
+    if (date) {
+      // For a particular date
+      const start = new Date(date);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      query.date = { $gte: start, $lte: end };
+    } else if (weekStart && weekEnd) {
+      // For a week range
+      query.date = {
+        $gte: new Date(weekStart),
+        $lte: new Date(weekEnd)
+      };
+    }
+
+    const wellness = await PatientWellness.find(query);
+    res.json(wellness);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
